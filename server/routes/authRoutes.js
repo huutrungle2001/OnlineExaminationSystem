@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const {
-  login,
-  register,
-} = require("../controllers/auth.controller");
+const { login, register } = require("../controllers/auth.controller");
 const Joi = require("joi");
 const validator = require("express-joi-validation").createValidator({});
 const requireAuth = require("../middlewares/requireAuth");
@@ -30,10 +27,10 @@ router.get("/me", requireAuth.requireAuth, (req, res) => {
       _id: req.user.userId,
       email: req.user.email,
       username: req.user.username,
+      role: req.user.role,
     },
   });
 });
-
 
 // test route for requireAuth middleware
 router.get("/test", requireAuth.requireAuth, (req, res) => {

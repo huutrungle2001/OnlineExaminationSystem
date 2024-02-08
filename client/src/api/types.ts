@@ -26,12 +26,12 @@ export type AuthResponse = {
     email: string;
     token: string;
     username: string;
-    active: boolean;
+    role: string;
   };
 };
-export type  RegisterResponse = { 
-    status : number;
-    message : string;
+export type RegisterResponse = {
+  status: number;
+  message: string;
 };
 
 export type GetMeResponse = {
@@ -39,5 +39,7 @@ export type GetMeResponse = {
     _id: string;
     email: string;
     username: string;
+    role: string;
   };
 };
+

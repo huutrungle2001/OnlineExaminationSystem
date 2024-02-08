@@ -4,22 +4,22 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import { authReducer } from "../reducers/authReducer";
 import { alertReducer } from "../reducers/alertReducer";
-import { friendsReducer } from "../reducers/friendsReducer";
-import { chatReducer } from "../reducers/chatReducer";
-import videoChatReducer from "../reducers/videoChatReducer";
-import { roomReducer } from "../reducers/roomReducer";
-import { configReducer } from "../reducers/configReducer";
-import { keyLoginReducer } from "../reducers/keyLoginReducer";
+// import { friendsReducer } from "../reducers/friendsReducer";
+// import { chatReducer } from "../reducers/chatReducer";
+// import videoChatReducer from "../reducers/videoChatReducer";
+// import { roomReducer } from "../reducers/roomReducer";
+// import { configReducer } from "../reducers/configReducer";
+// import { keyLoginReducer } from "../reducers/keyLoginReducer";
 
 const rootReducer = combineReducers({
     auth: authReducer,
     alert: alertReducer,
-    friends: friendsReducer,
-    chat: chatReducer,
-    videoChat: videoChatReducer,
-    room: roomReducer,
-    config: configReducer,
-    keyLogin: keyLoginReducer
+    // friends: friendsReducer,
+    // chat: chatReducer,
+    // videoChat: videoChatReducer,
+    // room: roomReducer,
+    // config: configReducer,
+    // keyLogin: keyLoginReducer
 });
 
 const store = createStore(

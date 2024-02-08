@@ -39,7 +39,7 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-const isHost = (req, res, next) => {
+const isHostOrAdmin = (req, res, next) => {
   let token = req.body.token || req.query.token || req.headers["authorization"];
   if (!token) {
     return res
@@ -50,7 +50,10 @@ const isHost = (req, res, next) => {
     token = token.split(" ")[1];
     const decoded = jwt.verify(token, "JWT_SECRET");
     console.log(decoded);
-    if ((req.user = decoded && decoded.role === "host")) {
+    if (
+      (req.user =
+        decoded && (decoded.role === "host" || decoded.role === "admin"))
+    ) {
       return next();
     }
   } catch (err) {
@@ -58,4 +61,4 @@ const isHost = (req, res, next) => {
   }
 };
 
-module.exports = { requireAuth, isAdmin , isHost };
+module.exports = { requireAuth, isAdmin, isHostOrAdmin };

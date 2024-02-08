@@ -1,10 +1,11 @@
-const express = require('express');
+const express = require("express");
 const http = require("http");
-const cors = require('cors');
-const mongoose = require('mongoose');
+const cors = require("cors");
+const mongoose = require("mongoose");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
+const contestRoute = require("./routes/contestRoutes");
 
 const app = express();
 
@@ -14,11 +15,12 @@ app.use(express.json());
 // register the route
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/contest", contestRoute);
 const server = http.createServer(app);
 
 // Kết nối tới MongoDB
 mongoose
-  .connect('mongodb://127.0.0.1/examOnline')
+  .connect("mongodb://127.0.0.1/examOnline")
   .then(() => {
     server.listen(5000, "0.0.0.0", () => {
       console.log(`SERVER STARTED ON ${5000}.....!`);

@@ -1,42 +1,54 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import { styled } from "@mui/system";
-import { closeConnectWithServerAuth, connectWithSocketServer, UserDetails } from "../../socket/socketConnection";
-import { useAppSelector } from "../../store";
-import ResponsiveDrawer from "./Drawer";
-import { store } from "../../store";
-import { setConfig } from "../../actions/configAction";
-import { getConfig } from "../../api/api";
+import { useNavigate } from "react-router-dom";
+import { AppBar, Button, Toolbar, Typography } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../actions/authActions";
+import Layout from "../../components/Layout";
+
 const Wrapper = styled("div")({
-    width: "100%",
-    height: "100vh",
-    display: "flex",
+  width: "100%",
+  height: "100vh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const NavBarWrapper = styled("div")({
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  zIndex: 1000,
 });
 
 const Dashboard = () => {
-    const {auth: {userDetails}, videoChat: {localStream}, room: { isUserInRoom, localStreamRoom }} = useAppSelector((state) => state);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-    useEffect(() => {
-        const isLoggedIn = userDetails?.token;
+  const handleLogout = () => {
+    dispatch(logoutUser());
+  };
 
-        if (!isLoggedIn) {
-            navigate("/login");
-        } else {
-            // connect to socket server
-            closeConnectWithServerAuth();
-            connectWithSocketServer(userDetails as UserDetails);
-            getConfig().then((config) => { store.dispatch(setConfig(config?.salt, parseInt(config?.p), parseInt(config?.g)) as any)})
-        }
+  const handleNavigate = (path: any) => {
+    navigate(path);
+  };
 
-    }, [userDetails, navigate]);
-
-
-    return (
-        <Wrapper>
-            <ResponsiveDrawer localStream={localStream || localStreamRoom} isUserInRoom={isUserInRoom} />
-        </Wrapper>
-    );
+  return (
+    <Layout>
+      <div
+        style={{
+          textAlign: "center",
+          justifyContent: "center",
+          marginTop: "50%",
+        }}
+      >
+        Xin chào
+      </div>
+    </Layout>
+  );
 };
 
 export default Dashboard;

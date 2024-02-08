@@ -5,7 +5,6 @@ const jwt = require("jsonwebtoken");
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-
     // check if user exists
     const userExists = await User.exists({ email: email.toLowerCase() });
 
@@ -23,8 +22,31 @@ const register = async (req, res) => {
     };
     // create user document and save in database
     const user = await User.create(userDoc);
+
+    // create JWT token
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        email,
+        username: user.username,
+        role: user.role,
+      },
+      "JWT_SECRET",
+      {
+        expiresIn: "15d",
+      }
+    );
+
     if (user) {
-      return res.status(200).send("Register successfully");
+      return res.status(200).json({
+        userDetails: {
+          _id: user._id,
+          email: user.email,
+          token: token,
+          username: user.username,
+          role: user.role,
+        },
+      });
     } else {
       return res.status(500).send("Error occurred. Please try again");
     }
@@ -68,7 +90,7 @@ const login = async (req, res) => {
       },
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res.status(500).send("Something went wrong. Please try again");
   }
 };
