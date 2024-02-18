@@ -19,39 +19,66 @@ const {
   deleteContest,
   getContestById,
   getAllContest,
+  getTestDetail,
 } = require("../controllers/contest");
 const {
   createFillInBlankQuest,
   deleteFillInBlankQuest,
+  updateFillInBlankQuest,
 } = require("../controllers/follInblank");
-const { createMcqQuest, deleteMcqQuest } = require("../controllers/mcqQuest");
+const {
+  createMcqQuest,
+  deleteMcqQuest,
+  updateMcqQuest,
+} = require("../controllers/mcqQuest");
+
 const router = express.Router();
 
+// Contest routes
 router.get("/getAll", requireAuth.isHostOrAdmin, getAllContest);
 router.get("/:contestId", requireAuth.isHostOrAdmin, getContestById);
 router.post("/create", requireAuth.isHostOrAdmin, createContest);
 router.delete("/:contestId", requireAuth.isHostOrAdmin, deleteContest);
+
+// Fill-in-Blank Question routes
 router.post(
   "/:contestId/fillInBlankQuest",
   upload.single("image"),
   requireAuth.isHostOrAdmin,
   createFillInBlankQuest
 );
+router.patch(
+  "/fillInBlankQuest/update/:fillInBlankQuestId",
+  upload.single("image"),
+  requireAuth.isHostOrAdmin,
+  updateFillInBlankQuest
+);
 router.delete(
   "/:contestId/fillInBlankQuest/:fillInBlankQuestId",
   requireAuth.isHostOrAdmin,
   deleteFillInBlankQuest
 );
+
+// Multiple Choice Question routes
 router.post(
   "/:contestId/mcqQuest",
   upload.single("image"),
   requireAuth.isHostOrAdmin,
   createMcqQuest
 );
+router.patch(
+  "/mcqQuest/update/:mcqId",
+  upload.single("image"),
+  requireAuth.isHostOrAdmin,
+  updateMcqQuest
+);
 router.delete(
   "/:contestId/mcqQuest/:mcqQuestId",
   requireAuth.isHostOrAdmin,
   deleteMcqQuest
 );
+
+// Other routes
+router.get("/getTest/:contestId", getTestDetail);
 
 module.exports = router;

@@ -8,17 +8,16 @@ import Register from "./pages/Register";
 import AlertNotification from "./components/AlertNotification";
 import { useAppSelector } from "./store";
 import Loading from "./components/Loading";
-import { NotFoundPage } from "./pages/NotFound";
-import { UsersComponent } from "./pages/Users";
-import { UserUpdateComponent } from "./pages/UserUpdate";
 import Dashboard from "./pages/Dashboard";
 import UserManager from "./pages/Dashboard/user/userManager";
 import TestManager from "./pages/Dashboard/test/testManager";
 import ContestDetails from "./pages/Dashboard/test/contestDetail";
+import TestList from "./pages/Dashboard/doingTest/testList";
+import TestDetail from "./pages/Dashboard/doingTest/testDetail";
 
 function App() {
   const dispatch = useDispatch();
-  const { loading, userDetails } = useAppSelector((state) => state.auth);
+  const { loading } = useAppSelector((state) => state.auth);
 
   // auto login
   useEffect(() => {
@@ -28,7 +27,7 @@ function App() {
   if (loading) {
     return <Loading />;
   }
-  
+
   return (
     <>
       <BrowserRouter>
@@ -38,7 +37,9 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/manage-users" element={<UserManager />} />
           <Route path="/manage-tests" element={<TestManager />} />
-          <Route path="/contest/:contestId" element = {<ContestDetails/>} />
+          <Route path="/take-exam" element={<TestList />} />
+          <Route path="/contest/:contestId" element={<ContestDetails />} />
+          <Route path="/dotest/:contestId" element={<TestDetail />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>

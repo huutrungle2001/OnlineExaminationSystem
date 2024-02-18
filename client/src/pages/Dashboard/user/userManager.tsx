@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { deleteUser, getAllUser } from "../../../api/api";
 import { useAppSelector } from "../../../store";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
@@ -12,6 +10,7 @@ import Table from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
 import Layout from "../../../components/Layout";
+import { useNavigate } from "react-router-dom";
 
 const UserManager = () => {
   const {
@@ -19,6 +18,7 @@ const UserManager = () => {
   } = useAppSelector((state) => state);
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -31,8 +31,14 @@ const UserManager = () => {
         console.log(error);
       }
     };
+    const isLoggedIn = userDetails?.token;
+
+    if (!isLoggedIn) {
+      navigate("/login");
+    }
     fetchUsers();
-  }, [userDetails]);
+  }, [userDetails, navigate]);
+  
 
   const handleDeleteUser = async (userId: any) => {
     try {

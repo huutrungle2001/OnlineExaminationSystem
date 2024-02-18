@@ -10,6 +10,12 @@ const userSchema = new mongoose.Schema(
     username: { type: String },
     password: { type: String, required: [true, "can't be blank"] },
     role: { type: String, enum: ["admin", "user", "host"], default: "user" },
+    contests: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Contest",
+      },
+    ],
   },
   { timestamps: true }
 );

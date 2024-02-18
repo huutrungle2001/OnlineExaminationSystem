@@ -33,7 +33,6 @@ const getAllUsers = async (req, res) => {
     const users = await user
       .find({ _id: { $ne: req.params.userId } })
       .select("-password");
-    console.log(users);
     return res.status(200).json({ success: true, users });
   } catch (error) {
     console.log(error);
@@ -41,8 +40,18 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getUsers = async (req, res) => {
+  try {
+    const users = await user.find().select("-password -role");
+    return res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+};
 module.exports = {
   addRoleForUser,
   deleteUser,
   getAllUsers,
+  getUsers,
 };

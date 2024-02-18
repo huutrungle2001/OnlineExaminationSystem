@@ -1,19 +1,12 @@
 import React from "react";
 import { styled } from "@mui/system";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AppBar, Button, Toolbar, Typography } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../actions/authActions";
+import { useAppSelector } from "../store";
 
-const Wrapper = styled("div")({
-  width: "100%",
-  height: "100vh",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-});
 
 const NavBarWrapper = styled("div")({
   display: "flex",
@@ -24,6 +17,10 @@ const NavBarWrapper = styled("div")({
 const Layout = ({ children }: any) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const {
+    auth: { userDetails },
+  } = useAppSelector((state) => state);
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -46,24 +43,30 @@ const Layout = ({ children }: any) => {
             Dashboard
           </Typography>
           <NavBarWrapper>
-            <Button
-              color="inherit"
-              onClick={() => handleNavigate("/manage-users")}
-            >
-              Quản lý người dùng
-            </Button>
-            <Button
-              color="inherit"
-              onClick={() => handleNavigate("/manage-tests")}
-            >
-              Quản lý đề thi
-            </Button>
-            <Button
-              color="inherit"
-              onClick={() => handleNavigate("/take-exam")}
-            >
-              Làm đề thi
-            </Button>
+            {userDetails?.role === "admin" && (
+              <>
+                <Button
+                  color="inherit"
+                  onClick={() => handleNavigate("/manage-users")}
+                >
+                  Quản lý người dùng
+                </Button>
+                <Button
+                  color="inherit"
+                  onClick={() => handleNavigate("/manage-tests")}
+                >
+                  Quản lý đề thi
+                </Button>
+              </>
+            )}
+            {(userDetails?.role === "admin" || userDetails?.role === "host") && (
+              <Button
+                color="inherit"
+                onClick={() => handleNavigate("/take-exam")}
+              >
+                Làm đề thi
+              </Button>
+            )}
           </NavBarWrapper>
           <Button
             color="inherit"

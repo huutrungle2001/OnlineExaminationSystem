@@ -19,7 +19,7 @@ const createContest = async (req, res) => {
     if (newContest) {
       return res
         .status(200)
-        .json({ contest: newContest, message: "create contest successfully"});
+        .json({ contest: newContest, message: "create contest successfully" });
     } else {
       return res.status(500).send("Error occurred. Please try again");
     }
@@ -64,7 +64,30 @@ const getContestById = async (req, res) => {
     const Contest = await contest
       .findById(contestId)
       .populate("fillInBlankQuests")
-      .populate({ path: "mcqQuests", select: "-correctOption" });
+      .populate({ path: "mcqQuests" });
+    if (!Contest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Contest not found" });
+    }
+
+    return res.status(200).json({ success: true, data: Contest });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+};
+
+const getTestDetail = async (req, res) => {
+  try {
+    const { contestId } = req.params;
+    const Contest = await contest
+      .findById(contestId)
+      .populate({
+        path: "mcqQuests",
+        select: "-correctOption -createdAt -updatedAt",
+      })
+      .populate({ path: "fillInBlankQuests", select: "-createdAt -updatedAt" });
     if (!Contest) {
       return res
         .status(404)
@@ -81,7 +104,6 @@ const getContestById = async (req, res) => {
 const getAllContest = async (req, res) => {
   try {
     const contests = await contest.find();
-    console.log(contests);
     return res.status(200).json({ success: true, data: contests });
   } catch (error) {
     console.log(error);
@@ -93,4 +115,5 @@ module.exports = {
   deleteContest,
   getContestById,
   getAllContest,
+  getTestDetail,
 };

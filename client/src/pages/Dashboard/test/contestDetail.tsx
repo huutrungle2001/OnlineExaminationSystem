@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../../components/Layout";
 import {
+  addUserToContest,
   creatMCQ,
   createFillInBlankQuest,
   deleteFill,
   getContestDetail,
+  getUsers,
+  updateFillInBlankQuest,
+  updateMCQQuest,
 } from "../../../api/api";
+import MenuItem from "@mui/material/MenuItem";
 import { useParams } from "react-router";
 import Paper from "@mui/material/Paper";
 import {
@@ -14,6 +19,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -36,6 +43,21 @@ const ContestDetails = () => {
   const [c, setC] = useState("");
   const [d, setD] = useState("");
   const [correct, setCorrect] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
+  const [imageBase64, setImageBase64] = useState<any>(true);
+  const [dialogMCQOpen, setDialogMCQOpen] = useState(false);
+  const [allUser, setAllUser] = useState([]);
+  const [selectedUser, setSelectedUser] = useState([]);
+
+  const handleImageClose = () => {
+    setSelectedQuestion((prevQuestion: any) => ({
+      ...prevQuestion,
+      imageBase64: null,
+    }));
+    setImageBase64(false);
+    setFile(null);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -46,17 +68,46 @@ const ContestDetails = () => {
     setNumberRange(Number(e.target.value));
   };
 
+  const handleAddUserToContest = async (users: any, contestDetail: any) => {
+    try {
+      const res: any = await addUserToContest(users, contestDetail._id);
+      if (res.status === 200) {
+        console.log("add user success");
+        // ....
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     const fetchContests = async () => {
       try {
         const response: any = await getContestDetail(contestId);
         if (response.data.success === true) {
           setContestDetail(response.data.data);
+          setSelectedUser(response.data.data.participant);
         }
       } catch (error) {
         console.log(error);
       }
     };
+
+    const getAllUser = async () => {
+      try {
+        const response: any = await getUsers();
+        if (response?.users?.success === true) {
+          const options = response.users.users.map((user: any) => ({
+            value: user._id,
+            label: user.email,
+          }));
+          setAllUser(options);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getAllUser();
     fetchContests();
   }, [contestId]);
 
@@ -66,12 +117,70 @@ const ContestDetails = () => {
       formData.append("image", file as File);
       formData.append("numberRange", String(numberRange));
       formData.append("question", question);
-      console.log("form:", formData);
       const res: any = await createFillInBlankQuest(contestId, formData);
-      console.log(res);
       if (res.data.success === true) {
         contestDetail.fillInBlankQuests.push(res.data.data);
         setOpenFill(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleUpdateFill = async (selectedQuestion: any, type: string) => {
+    try {
+      if (type === "fill") {
+        const formData = new FormData();
+        formData.append("image", file as File);
+        formData.append("numberRange", String(selectedQuestion?.numberRange));
+        formData.append("question", selectedQuestion?.question);
+        formData.append("isImageBase64", imageBase64);
+        const res: any = await updateFillInBlankQuest(
+          formData,
+          selectedQuestion?._id
+        );
+        if (res.data.success === true) {
+          const updatedFillInBlankQuests = [...contestDetail.fillInBlankQuests];
+          const index = updatedFillInBlankQuests.findIndex(
+            (quest) => quest._id === selectedQuestion._id
+          );
+          if (index !== -1) {
+            updatedFillInBlankQuests[index] = res.data.data;
+            setContestDetail({
+              ...contestDetail,
+              fillInBlankQuests: updatedFillInBlankQuests,
+            });
+            setDialogOpen(false);
+          }
+        }
+      } else {
+        const formData = new FormData();
+        formData.append("image", file as File);
+        formData.append("question", selectedQuestion?.question);
+        formData.append("a", String(selectedQuestion?.a));
+        formData.append("b", String(selectedQuestion?.b));
+        formData.append("c", String(selectedQuestion?.c));
+        formData.append("d", String(selectedQuestion?.d));
+        formData.append(
+          "correctOption",
+          String(selectedQuestion?.correctOption)
+        );
+        formData.append("isImageBase64", imageBase64);
+        const res: any = await updateMCQQuest(formData, selectedQuestion?._id);
+        if (res.data.success === true) {
+          const updatedMcqQuests = [...contestDetail.mcqQuests];
+          const index = updatedMcqQuests.findIndex(
+            (quest) => quest._id === selectedQuestion._id
+          );
+          if (index !== -1) {
+            updatedMcqQuests[index] = res.data.data;
+            setContestDetail({
+              ...contestDetail,
+              mcqQuests: updatedMcqQuests,
+            });
+            setDialogMCQOpen(false);
+          }
+        }
       }
     } catch (error) {
       console.log(error);
@@ -98,8 +207,19 @@ const ContestDetails = () => {
     }
   };
 
-  const handleViewDetails = async (questionId: string) => {
+  const handleViewDetails = async (question: any) => {
     try {
+      setSelectedQuestion(question);
+      setDialogOpen(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleViewDetailsMCQ = async (question: any) => {
+    try {
+      setSelectedQuestion(question);
+      setDialogMCQOpen(true);
     } catch (error) {
       console.log(error);
     }
@@ -108,7 +228,6 @@ const ContestDetails = () => {
   const handleDelete = async (fillInBlankQuestId: string) => {
     try {
       const res: any = await deleteFill(contestId, fillInBlankQuestId);
-      console.log(res.data.success === true);
       if (res) {
         const updatedFillInBlankQuests =
           contestDetail?.fillInBlankQuests.filter(
@@ -124,6 +243,15 @@ const ContestDetails = () => {
     }
   };
 
+  const handleChange = async (event: any) => {
+    try {
+      const selectedValues = event.target.value;
+      setSelectedUser(selectedValues);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <Layout>
       <h2>Contest Details</h2>
@@ -133,6 +261,22 @@ const ContestDetails = () => {
       <p>Created At: {contestDetail?.createdAt}</p>
       <p>Updated At: {contestDetail?.updatedAt}</p>
 
+      <Select multiple value={selectedUser} onChange={handleChange}>
+        {allUser.map((user: any) => (
+          <MenuItem key={user.value} value={user.value}>
+            {user.label}
+          </MenuItem>
+        ))}
+      </Select>
+      <br />
+      <Button
+        variant="contained"
+        onClick={() => handleAddUserToContest(selectedUser, contestDetail)}
+      >
+        Add user to contest
+      </Button>
+      <br />
+      <br />
       {/* Hiển thị fillInBlankQuests */}
       <Button variant="contained" onClick={() => setOpenFill(true)}>
         Create Fill in Blank Questions
@@ -161,7 +305,7 @@ const ContestDetails = () => {
                     {question.imageBase64 && (
                       <img
                         src={`data:image/jpeg;base64,${question.imageBase64}`}
-                        alt="Question Image"
+                        alt=""
                       />
                     )}
                   </TableCell>
@@ -179,7 +323,9 @@ const ContestDetails = () => {
                   <TableCell>
                     <Button
                       variant="contained"
-                      onClick={() => handleViewDetails(question._id)}
+                      onClick={() =>
+                        handleViewDetails(question)
+                      }
                     >
                       Edit Details
                     </Button>
@@ -190,6 +336,73 @@ const ContestDetails = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        aria-labelledby="dialog-title"
+      >
+        <DialogTitle>Edit Fill</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Question"
+            variant="outlined"
+            defaultValue={selectedQuestion?.question}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                question: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Number Range"
+            variant="outlined"
+            type="number"
+            defaultValue={selectedQuestion?.numberRange}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                numberRange: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          {selectedQuestion?.imageBase64 ? (
+            <div style={{ position: "relative" }}>
+              <img
+                src={`data:image/jpeg;base64,${selectedQuestion?.imageBase64}`}
+                alt=""
+                style={{ width: "100%" }}
+              />
+              <IconButton
+                onClick={handleImageClose}
+                style={{ position: "absolute", top: "8px", right: "8px" }}
+              >
+                x
+              </IconButton>
+            </div>
+          ) : (
+            <input type="file" onChange={handleFileChange} />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <DialogActions>
+            <Button onClick={() => setDialogOpen(false)} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => handleUpdateFill(selectedQuestion, "fill")}
+          >
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Hiển thị mcqQuests */}
       <Button variant="contained" onClick={() => setOpenMCQ(true)}>
@@ -220,7 +433,7 @@ const ContestDetails = () => {
                   {question.imageBase64 && (
                     <img
                       src={`data:image/jpeg;base64,${question.imageBase64}`}
-                      alt="Question Image"
+                      alt=""
                     />
                   )}
                 </TableCell>
@@ -241,7 +454,7 @@ const ContestDetails = () => {
                 <TableCell>
                   <Button
                     variant="contained"
-                    onClick={() => handleViewDetails(question._id)}
+                    onClick={() => handleViewDetailsMCQ(question)}
                   >
                     Edit Details
                   </Button>
@@ -251,6 +464,124 @@ const ContestDetails = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Dialog
+        open={dialogMCQOpen}
+        onClose={() => setDialogMCQOpen(false)}
+        aria-labelledby="dialog-title"
+      >
+        <DialogTitle>Edit MCQ</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Question"
+            variant="outlined"
+            defaultValue={selectedQuestion?.question}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                question: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="A"
+            variant="outlined"
+            defaultValue={selectedQuestion?.a}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                a: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="B"
+            variant="outlined"
+            defaultValue={selectedQuestion?.b}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                b: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="C"
+            variant="outlined"
+            defaultValue={selectedQuestion?.c}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                c: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="D"
+            variant="outlined"
+            defaultValue={selectedQuestion?.d}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                d: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="CorrectOption"
+            variant="outlined"
+            defaultValue={selectedQuestion?.correctOption}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                correctOption: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          {selectedQuestion?.imageBase64 ? (
+            <div style={{ position: "relative" }}>
+              <img
+                src={`data:image/jpeg;base64,${selectedQuestion?.imageBase64}`}
+                alt=""
+                style={{ width: "100%" }}
+              />
+              <IconButton
+                onClick={handleImageClose}
+                style={{ position: "absolute", top: "8px", right: "8px" }}
+              >
+                x
+              </IconButton>
+            </div>
+          ) : (
+            <input type="file" onChange={handleFileChange} />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <DialogActions>
+            <Button onClick={() => setDialogMCQOpen(false)} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => handleUpdateFill(selectedQuestion, "mcq")}
+          >
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={openFill} onClose={() => setOpenFill(false)}>
         <DialogTitle>Tạo Fill</DialogTitle>

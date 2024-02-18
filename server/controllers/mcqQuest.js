@@ -4,7 +4,6 @@ const fs = require("fs");
 
 const createMcqQuest = async (req, res) => {
   try {
-    console.log(req.body);
     const { contestId } = req.params;
     const { question, a, b, c, d, correctOption } = req.body;
 
@@ -86,7 +85,69 @@ const deleteMcqQuest = async (req, res) => {
   }
 };
 
+const getMcqQuestById = async () => {
+  try {
+    const { id } = req.params;
+
+    const mcqQuestData = await mcqQuest.findById(id);
+    if (!mcqQuestData) {
+      return res
+        .status(404)
+        .json({ success: false, message: "mcqQuestData not found" });
+    }
+    return res.status(200).json({ success: true, data: mcqQuestData });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+};
+
+const updateMcqQuest = async (req, res) => {
+  try {
+    const { mcqId } = req.params;
+    const { question, a, b, c, d, correctOption, isImageBase64 } = req.body;
+
+    let data = {};
+    let imageBase64 = null;
+    if (req.file) {
+      const imageBuffer = fs.readFileSync(req.file.path);
+      imageBase64 = imageBuffer.toString("base64");
+      fs.unlinkSync(req.file.path);
+    }
+
+    if (isImageBase64 === true) {
+      data = { question, a, b, c, d, correctOption };
+    } else {
+      data = { question, a, b, c, d, correctOption, imageBase64 };
+    }
+
+    // Cập nhật MCQQuest
+    const updatedMcqQuest = await mcqQuest.findOneAndUpdate(
+      { _id: mcqId },
+      { $set: data },
+      { new: true }
+    );
+
+    if (!updatedMcqQuest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "MCQQuest not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "MCQQuest updated successfully",
+      data: updatedMcqQuest,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+};
+
 module.exports = {
   createMcqQuest,
   deleteMcqQuest,
+  getMcqQuestById,
+  updateMcqQuest,
 };

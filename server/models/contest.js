@@ -27,6 +27,12 @@ const contestSchema = new mongoose.Schema(
         ref: "MCQQuest",
       },
     ],
+    participant: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

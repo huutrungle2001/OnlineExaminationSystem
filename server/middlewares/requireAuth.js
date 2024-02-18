@@ -30,7 +30,6 @@ const isAdmin = (req, res, next) => {
   try {
     token = token.split(" ")[1];
     const decoded = jwt.verify(token, "JWT_SECRET");
-    console.log(decoded);
     if ((req.user = decoded && decoded.role === "admin")) {
       return next();
     }
@@ -49,7 +48,6 @@ const isHostOrAdmin = (req, res, next) => {
   try {
     token = token.split(" ")[1];
     const decoded = jwt.verify(token, "JWT_SECRET");
-    console.log(decoded);
     if (
       (req.user =
         decoded && (decoded.role === "host" || decoded.role === "admin"))

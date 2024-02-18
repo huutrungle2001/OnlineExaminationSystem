@@ -31,18 +31,10 @@ api.interceptors.request.use(
   }
 );
 
-const logOut = () => {
-  localStorage.clear();
-  window.location.pathname = "/login";
-};
-
-const checkForAuthorization = (error: any) => {
-  const responseCode = error?.response?.status;
-
-  if (responseCode) {
-    responseCode === 401 && logOut();
-  }
-};
+// const logOut = () => {
+//   localStorage.clear();
+//   window.location.pathname = "/login";
+// };
 
 export const login = async ({ email, password }: LoginArgs) => {
   try {
@@ -226,12 +218,101 @@ export const deleteFill = async (contestId: any, fillInBlankQuestId: any) => {
 };
 export const creatMCQ = async (contestId: any, mCQuest: any) => {
   try {
-    console.log(mCQuest);
     const res = await api.post<any>(
       `/api/contest/${contestId}/mcqQuest`,
       mCQuest
     );
-    console.log(res);
+    return res;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      message: error,
+    };
+  }
+};
+
+export const updateFillInBlankQuest = async (
+  data: any,
+  fillInBlankQuestId: any
+) => {
+  try {
+    const res = await api.patch(
+      `/api/contest/fillInBlankQuest/update/${fillInBlankQuestId}`,
+      data
+    );
+    return res;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      message: error,
+    };
+  }
+};
+
+export const updateMCQQuest = async (data: any, mcqId: any) => {
+  try {
+    const res = await api.patch(`/api/contest/mcqQuest/update/${mcqId}`, data);
+    return res;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      message: error,
+    };
+  }
+};
+
+export const addUserToContest = async (userId: any, contestId: any) => {
+  try {
+    const res = await api.patch(
+      `/api/participant/addUser/${contestId}`,
+      userId
+    );
+    return res;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      message: error,
+    };
+  }
+};
+
+export const getAddedContest = async (userId: any) => {
+  try {
+    const res = await api.get(`/api/participant/${userId}`);
+    return res;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      message: error,
+    };
+  }
+};
+
+export const getUsers = async () => {
+  try {
+    const res = await api.get<any>(`/api/user`);
+    return {
+      users: res.data,
+      statusCode: 200,
+    };
+  } catch (err: any) {
+    console.log(err);
+    return {
+      error: true,
+      message: err?.response?.data,
+      statusCode: err?.response?.status,
+    };
+  }
+};
+
+export const getTestDetail = async (contestId: any) => {
+  try {
+    const res = await api.get(`/api/contest/getTest/${contestId}`);
     return res;
   } catch (error) {
     console.log(error);

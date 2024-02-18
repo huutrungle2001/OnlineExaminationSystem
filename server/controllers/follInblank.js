@@ -4,7 +4,6 @@ const fs = require("fs");
 
 const createFillInBlankQuest = async (req, res) => {
   try {
-    console.log(req.params, req.body);
     const { contestId } = req.params;
     const { question, numberRange } = req.body;
 
@@ -14,7 +13,7 @@ const createFillInBlankQuest = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Contest not found" });
     }
-
+    console.log(req.file)
     let imageBase64 = null;
     if (req.file) {
       const imageBuffer = fs.readFileSync(req.file.path);
@@ -102,8 +101,48 @@ const getFillInBlankQuestById = async () => {
   }
 };
 
+const updateFillInBlankQuest = async (req, res) => {
+  try {
+    const { fillInBlankQuestId } = req.params;
+    const { question, numberRange, isImageBase64 } = req.body;
+    let data = {}
+    let imageBase64 = null;
+    if (req.file) {
+      const imageBuffer = fs.readFileSync(req.file.path);
+      imageBase64 = imageBuffer.toString("base64");
+      fs.unlinkSync(req.file.path);
+    } 
+    if (isImageBase64 === true) {
+      data = {question, numberRange}
+    } else {
+      data = {question, numberRange, imageBase64}
+    }
+    const updatedFillInBlankQuest = await fillInBlankQuest.findOneAndUpdate(
+      { _id: fillInBlankQuestId },
+      { $set: data},
+      { new: true }
+    );
+
+    if (!updatedFillInBlankQuest) {
+      return res
+        .status(404)
+        .json({ success: false, message: "FillInBlankQuest not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "FillInBlankQuest updated successfully",
+      data: updatedFillInBlankQuest,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+};
+
 module.exports = {
   createFillInBlankQuest,
   deleteFillInBlankQuest,
   getFillInBlankQuestById,
+  updateFillInBlankQuest,
 };

@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { createContest, deleteContest, getAllContest } from "../../../api/api";
 import { useAppSelector } from "../../../store";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
@@ -36,7 +34,6 @@ const TestManager = () => {
     const fetchContests = async () => {
       try {
         const response: any = await getAllContest();
-        console.log(response);
         if (response.data.success === true) {
           setContests(response.data.data);
         }
@@ -80,10 +77,8 @@ const TestManager = () => {
   };
 
   const handleViewDetails = (contestId: any) => {
-    console.log(contestId);
     // Xử lý logic hiển thị chi tiết của cuộc thi với ID contestId
     handleNavigate(`/contest/${contestId}`);
-    console.log("View details of contest:", contestId);
   };
 
   return (
