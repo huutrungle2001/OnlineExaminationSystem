@@ -10,6 +10,7 @@ const MCQuestion = (props: any) => {
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleOptionChange = (event: any) => {
+    console.log(event.target)
     const selectedValue = event.target.value;
     setSelectedOption(selectedValue);
     props.onAnswer(props.id, selectedValue);

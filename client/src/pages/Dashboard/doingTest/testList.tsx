@@ -44,7 +44,7 @@ const TestList = () => {
       navigate("/login");
     }
     fetchContests();
-  }, [userDetails]);
+  }, [userDetails, navigate]);
 
   //   const handleViewDetails = async (question: any) => {
   //     try {

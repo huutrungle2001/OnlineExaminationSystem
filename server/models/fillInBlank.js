@@ -10,8 +10,12 @@ const fillInBlankQuestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    numberRange: {
-      type: String,
+    lowerBound: {
+      type: Number,
+      required: true,
+    },
+    upperBound: {
+      type: Number,
       required: true,
     },
     imageBase64: {

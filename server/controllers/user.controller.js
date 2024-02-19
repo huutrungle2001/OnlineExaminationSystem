@@ -2,8 +2,12 @@ const user = require("../models/user");
 
 const addRoleForUser = async (req, res) => {
   try {
-    const { role, userId } = req.body;
-    const result = await user.findByIdAndUpdate(userId, { role: role });
+    const { role } = req.body;
+    const result = await user.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $set: { role } },
+      { new: true, projection: { password: 0 } }
+    );
     return res.status(200).json({ success: true, result });
   } catch (error) {
     console.log(error);

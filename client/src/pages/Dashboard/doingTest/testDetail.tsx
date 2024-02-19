@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 import Layout from "../../../components/Layout";
 import { useParams } from "react-router-dom";
-import { getTestDetail } from "../../../api/api";
+import { getTestDetail, submit } from "../../../api/api";
 import FillQuestion from "../../../components/FillQuest";
 import MCQuestion from "../../../components/MCQuest";
-import { Typography, Box } from "@mui/material";
+import { Typography, Box, Button } from "@mui/material";
+import { useAppSelector } from "../../../store";
 
 const TestDetail = () => {
   const [contestDetail, setContestDetail] = useState<any>();
   const { contestId } = useParams();
+  const {
+    auth: { userDetails },
+  } = useAppSelector((state) => state);
   const [userAnswers, setUserAnswers] = useState<any>({
-    userId: "",
-    conrestId: "",
+    userId: userDetails?._id,
+    contestId: contestId,
     answers: [],
   });
 
@@ -54,8 +58,19 @@ const TestDetail = () => {
       ...prevAnswers,
       answers: updateAnswer([...prevAnswers.answers], questionId, answer),
     }));
+  };
 
-    console.log(userAnswers);
+  const handleSubmit = async () => {
+    try {
+      console.log(userAnswers)
+      const response: any = await submit(userAnswers);
+      if (response.data.success === true) {
+        console.log("Test submitted successfully!");
+        // Thực hiện các hành động sau khi nộp bài thi thành công
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleMCAnswer = (questionId: string, answer: string) => {
@@ -83,8 +98,6 @@ const TestDetail = () => {
       ...prevAnswers,
       answers: updateAnswer([...prevAnswers.answers], questionId, answer),
     }));
-
-    console.log(userAnswers);
   };
 
   return (
@@ -114,15 +127,17 @@ const TestDetail = () => {
         Fill in Blank Questions:
       </Typography>
       <Box marginBottom={2}>
-        {contestDetail?.fillInBlankQuests.map((question: any, index: number) => (
-          <FillQuestion
-            key={question._id}
-            id={question._id}
-            title={question.question}
-            image={question.imageBase64}
-            onAnswer={handleFillAnswer}
-          />
-        ))}
+        {contestDetail?.fillInBlankQuests.map(
+          (question: any, index: number) => (
+            <FillQuestion
+              key={question._id}
+              id={question._id}
+              title={question.question}
+              image={question.imageBase64}
+              onAnswer={handleFillAnswer}
+            />
+          )
+        )}
       </Box>
 
       <Typography variant="h5" gutterBottom>
@@ -140,6 +155,9 @@ const TestDetail = () => {
           />
         ))}
       </Box>
+      <Button variant="contained" color="primary" onClick={handleSubmit}>
+        Submit
+      </Button>
     </Layout>
   );
 };

@@ -28,6 +28,7 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Typography,
 } from "@mui/material";
 
 const ContestDetails = () => {
@@ -36,8 +37,9 @@ const ContestDetails = () => {
   const [openFill, setOpenFill] = useState(false);
   const [openMCQ, setOpenMCQ] = useState(false);
   const [question, setQuestion] = useState("");
+  const [lowerBound, setLowerBound] = useState<number>(0);
+  const [upperBound, setUpperBound] = useState<number>(0);
   const [file, setFile] = useState<File | null>(null);
-  const [numberRange, setNumberRange] = useState<number>(0);
   const [a, setA] = useState("");
   const [b, setB] = useState("");
   const [c, setC] = useState("");
@@ -64,8 +66,13 @@ const ContestDetails = () => {
       setFile(e.target.files[0]);
     }
   };
-  const handleNumberRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNumberRange(Number(e.target.value));
+
+  const handleUpperBoundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUpperBound(Number(e.target.value));
+  };
+
+  const handleLowerBoundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLowerBound(Number(e.target.value));
   };
 
   const handleAddUserToContest = async (users: any, contestDetail: any) => {
@@ -115,9 +122,12 @@ const ContestDetails = () => {
     try {
       const formData = new FormData();
       formData.append("image", file as File);
-      formData.append("numberRange", String(numberRange));
+      formData.append("lowerBound", String(lowerBound));
+      formData.append("upperBound", String(upperBound));
       formData.append("question", question);
+
       const res: any = await createFillInBlankQuest(contestId, formData);
+
       if (res.data.success === true) {
         contestDetail.fillInBlankQuests.push(res.data.data);
         setOpenFill(false);
@@ -132,7 +142,8 @@ const ContestDetails = () => {
       if (type === "fill") {
         const formData = new FormData();
         formData.append("image", file as File);
-        formData.append("numberRange", String(selectedQuestion?.numberRange));
+        formData.append("lowerBound", String(selectedQuestion?.lowerBound));
+        formData.append("upperBound", String(selectedQuestion?.upperBound));
         formData.append("question", selectedQuestion?.question);
         formData.append("isImageBase64", imageBase64);
         const res: any = await updateFillInBlankQuest(
@@ -289,7 +300,8 @@ const ContestDetails = () => {
             <TableRow>
               <TableCell>Question</TableCell>
               <TableCell>Image</TableCell>
-              <TableCell>Number Range</TableCell>
+              <TableCell>Lower Bound</TableCell>
+              <TableCell>Upper Bound</TableCell>
               <TableCell>CreatedAt</TableCell>
               <TableCell>UpdatedAt</TableCell>
               <TableCell>Actions</TableCell>
@@ -309,7 +321,8 @@ const ContestDetails = () => {
                       />
                     )}
                   </TableCell>
-                  <TableCell>{question.numberRange}</TableCell>
+                  <TableCell>{question.lowerBound}</TableCell>
+                  <TableCell>{question.upperBound}</TableCell>
                   <TableCell>{question.createdAt}</TableCell>
                   <TableCell>{question.updatedAt}</TableCell>
                   <TableCell>
@@ -323,9 +336,7 @@ const ContestDetails = () => {
                   <TableCell>
                     <Button
                       variant="contained"
-                      onClick={() =>
-                        handleViewDetails(question)
-                      }
+                      onClick={() => handleViewDetails(question)}
                     >
                       Edit Details
                     </Button>
@@ -358,14 +369,28 @@ const ContestDetails = () => {
             margin="normal"
           />
           <TextField
-            label="Number Range"
+            label="Lower Bound"
             variant="outlined"
             type="number"
-            defaultValue={selectedQuestion?.numberRange}
+            defaultValue={selectedQuestion?.lowerBound}
             onChange={(e) =>
               setSelectedQuestion({
                 ...selectedQuestion,
-                numberRange: e.target.value,
+                lowerBound: e.target.value,
+              })
+            }
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Upper Bound"
+            variant="outlined"
+            type="number"
+            defaultValue={selectedQuestion?.upperBound}
+            onChange={(e) =>
+              setSelectedQuestion({
+                ...selectedQuestion,
+                upperBound: e.target.value,
               })
             }
             fullWidth
@@ -595,19 +620,37 @@ const ContestDetails = () => {
             margin="normal"
           />
           <TextField
-            label="Number Range"
+            label="Lower Bound"
             variant="outlined"
             type="number"
-            value={numberRange}
-            onChange={handleNumberRangeChange}
+            value={lowerBound}
+            onChange={handleLowerBoundChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Upper Bound"
+            variant="outlined"
+            type="number"
+            value={upperBound}
+            onChange={handleUpperBoundChange}
             fullWidth
             margin="normal"
           />
           <input type="file" onChange={handleFileChange} />
+          {upperBound <= lowerBound && (
+            <Typography variant="body2" color="error">
+              Upper Bound must be greater than Lower Bound.
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenFill(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreateFill}>
+          <Button
+            variant="contained"
+            onClick={handleCreateFill}
+            disabled={upperBound <= lowerBound}
+          >
             Create
           </Button>
         </DialogActions>
@@ -625,7 +668,7 @@ const ContestDetails = () => {
             margin="normal"
           />
           <TextField
-            label="A"
+            label="Option 1"
             variant="outlined"
             value={a}
             onChange={(e) => setA(e.target.value)}
@@ -633,7 +676,7 @@ const ContestDetails = () => {
             margin="normal"
           />
           <TextField
-            label="B"
+            label="Option 2"
             variant="outlined"
             value={b}
             onChange={(e) => setB(e.target.value)}
@@ -641,7 +684,7 @@ const ContestDetails = () => {
             margin="normal"
           />
           <TextField
-            label="C"
+            label="Option 3"
             variant="outlined"
             value={c}
             onChange={(e) => setC(e.target.value)}
@@ -649,7 +692,7 @@ const ContestDetails = () => {
             margin="normal"
           />
           <TextField
-            label="D"
+            label="Option 4"
             variant="outlined"
             value={d}
             onChange={(e) => setD(e.target.value)}

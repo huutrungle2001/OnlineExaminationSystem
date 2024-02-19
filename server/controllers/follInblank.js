@@ -1,19 +1,19 @@
-const contest = require("../models/contest");
-const fillInBlankQuest = require("../models/fillInBlank");
+const Contest = require("../models/contest");
+const FillInBlankQuest = require("../models/fillInBlank");
 const fs = require("fs");
 
 const createFillInBlankQuest = async (req, res) => {
   try {
     const { contestId } = req.params;
-    const { question, numberRange } = req.body;
+    const { question, lowerBound, upperBound } = req.body;
 
-    const oldContest = await contest.findById(contestId);
+    const oldContest = await Contest.findById(contestId);
     if (!oldContest) {
       return res
         .status(404)
         .json({ success: false, message: "Contest not found" });
     }
-    console.log(req.file)
+
     let imageBase64 = null;
     if (req.file) {
       const imageBuffer = fs.readFileSync(req.file.path);
@@ -21,10 +21,11 @@ const createFillInBlankQuest = async (req, res) => {
       fs.unlinkSync(req.file.path);
     }
 
-    const newFillInBlankQuest = await fillInBlankQuest.create({
+    const newFillInBlankQuest = await FillInBlankQuest.create({
       contestId,
       question,
-      numberRange,
+      lowerBound,
+      upperBound,
       imageBase64,
     });
 
@@ -46,15 +47,14 @@ const deleteFillInBlankQuest = async (req, res) => {
   try {
     const { contestId, fillInBlankQuestId } = req.params;
 
-    const oldContest = await contest.findById(contestId);
+    const oldContest = await Contest.findById(contestId);
     if (!oldContest) {
       return res
         .status(404)
         .json({ success: false, message: "Contest not found" });
     }
 
-    // Check if the FillInBlankQuest exists in the contest
-    const oldFillInBlankQuest = await fillInBlankQuest.findById(
+    const oldFillInBlankQuest = await FillInBlankQuest.findById(
       fillInBlankQuestId
     );
     if (!oldFillInBlankQuest) {
@@ -63,7 +63,6 @@ const deleteFillInBlankQuest = async (req, res) => {
         .json({ success: false, message: "FillInBlankQuest not found" });
     }
 
-    // Remove the FillInBlankQuest from the contest's fillInBlankQuests array
     const index = oldContest.fillInBlankQuests.indexOf(fillInBlankQuestId);
     if (index > -1) {
       oldContest.fillInBlankQuests.splice(index, 1);
@@ -71,8 +70,7 @@ const deleteFillInBlankQuest = async (req, res) => {
 
     await oldContest.save();
 
-    // Delete the FillInBlankQuest from the database
-    await fillInBlankQuest.findByIdAndDelete(fillInBlankQuestId);
+    await FillInBlankQuest.findByIdAndDelete(fillInBlankQuestId);
 
     return res.status(200).json({
       success: true,
@@ -84,11 +82,11 @@ const deleteFillInBlankQuest = async (req, res) => {
   }
 };
 
-const getFillInBlankQuestById = async () => {
+const getFillInBlankQuestById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const fillInBlankQuestData = await fillInBlankQuest.findById(id);
+    const fillInBlankQuestData = await FillInBlankQuest.findById(id);
     if (!fillInBlankQuestData) {
       return res
         .status(404)
@@ -104,22 +102,25 @@ const getFillInBlankQuestById = async () => {
 const updateFillInBlankQuest = async (req, res) => {
   try {
     const { fillInBlankQuestId } = req.params;
-    const { question, numberRange, isImageBase64 } = req.body;
-    let data = {}
+    const { question, lowerBound, upperBound, isImageBase64 } = req.body;
+    let data = {};
     let imageBase64 = null;
+
     if (req.file) {
       const imageBuffer = fs.readFileSync(req.file.path);
       imageBase64 = imageBuffer.toString("base64");
       fs.unlinkSync(req.file.path);
-    } 
-    if (isImageBase64 === true) {
-      data = {question, numberRange}
-    } else {
-      data = {question, numberRange, imageBase64}
     }
-    const updatedFillInBlankQuest = await fillInBlankQuest.findOneAndUpdate(
+
+    if (isImageBase64 === true) {
+      data = { question, lowerBound, upperBound };
+    } else {
+      data = { question, lowerBound, upperBound, imageBase64 };
+    }
+
+    const updatedFillInBlankQuest = await FillInBlankQuest.findOneAndUpdate(
       { _id: fillInBlankQuestId },
-      { $set: data},
+      { $set: data },
       { new: true }
     );
 

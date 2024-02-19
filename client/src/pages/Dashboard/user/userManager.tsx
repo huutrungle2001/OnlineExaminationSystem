@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { deleteUser, getAllUser } from "../../../api/api";
+import { deleteUser, getAllUser, updateUserRole } from "../../../api/api";
 import { useAppSelector } from "../../../store";
 import Button from "@mui/material/Button";
 import TableCell from "@mui/material/TableCell";
@@ -11,13 +11,13 @@ import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
 import Layout from "../../../components/Layout";
 import { useNavigate } from "react-router-dom";
+import { MenuItem, Select } from "@mui/material";
 
 const UserManager = () => {
   const {
     auth: { userDetails },
   } = useAppSelector((state) => state);
   const [users, setUsers] = useState([]);
-  const [selectedRole, setSelectedRole] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -38,7 +38,23 @@ const UserManager = () => {
     }
     fetchUsers();
   }, [userDetails, navigate]);
-  
+
+  const handleChange = async (userId: any, event: any) => {
+    try {
+      const newRole = event.target.value;
+      const response = await updateUserRole(userId, newRole);
+      console.log(response)
+      if (response.data.success === true) {
+        // Thay đổi role của người dùng trong danh sách hiện tại
+        const updatedUsers: any = users.map((u: any) =>
+          u._id === userId ? { ...u, role: newRole } : u
+        );
+        setUsers(updatedUsers);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const handleDeleteUser = async (userId: any) => {
     try {
@@ -65,6 +81,7 @@ const UserManager = () => {
               <TableCell>CreatedAt</TableCell>
               <TableCell>UpdatedAt</TableCell>
               <TableCell>Actions</TableCell>
+              <TableCell>Edit Role</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -82,6 +99,16 @@ const UserManager = () => {
                   >
                     Delete
                   </Button>
+                </TableCell>
+                <TableCell>
+                  <Select
+                    value={user.role}
+                    onChange={(event) => handleChange(user._id, event)}
+                  >
+                    <MenuItem value="admin">Admin</MenuItem>
+                    <MenuItem value="host">Host</MenuItem>
+                    <MenuItem value="user">User</MenuItem>
+                  </Select>
                 </TableCell>
               </TableRow>
             ))}

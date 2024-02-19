@@ -322,3 +322,35 @@ export const getTestDetail = async (contestId: any) => {
     };
   }
 };
+
+export const updateUserRole = async (userId: any, newRole: any) => {
+  try {
+    const res: any = await api.patch(`/api/user/updateRole/${userId}`, {
+      role: newRole,
+    });
+    return res;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      message: error,
+    };
+  }
+};
+
+export const submit = async (data: any) => {
+  try {
+    const res = await api.post(`/api/result/submit`, {
+      userId: data.userId,
+      contestId: data.contestId,
+      answers: data.answers,
+    });
+    return res;
+  } catch (error) {
+    console.log(error);
+    return {
+      error: true,
+      message: error,
+    };
+  }
+};
