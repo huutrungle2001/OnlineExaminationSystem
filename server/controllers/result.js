@@ -4,15 +4,21 @@ const MCQQuest = require("../models/mcqQuest");
 
 const submit = async (req, res) => {
   try {
-    console.log(req.body);
     const { userId, contestId, answers } = req.body;
-
-    console.log(userId, contestId, answers);
 
     if (!userId || !contestId || !answers) {
       return res
         .status(400)
         .json({ success: false, message: "Missing required information" });
+    }
+
+    // Kiểm tra xem bài thi đã có điểm chưa
+    const existingResult = await testResults.findOne({ userId, contestId });
+    if (existingResult) {
+      return res.status(200).json({
+        success: false,
+        message: "You have already submitted the test",
+      });
     }
 
     let totalScore = 0;
@@ -66,7 +72,6 @@ const submit = async (req, res) => {
     return res.status(500).json({ success: false, error });
   }
 };
-
 const getResultByContestId = async (req, res) => {
   try {
     const { contestId } = req.params;
@@ -84,7 +89,30 @@ const getResultByContestId = async (req, res) => {
     return res.status(500).json({ success: false, error });
   }
 };
+
+const getTestResult = async (req, res) => {
+  try {
+    const { contestId, userId } = req.params;
+
+    const result = await testResults.findOne({
+      contestId: contestId,
+      userId: userId,
+    });
+
+    if (result) {
+      return res.status(200).json({ success: true, data: result.testScores });
+    }
+
+    return res
+      .status(404)
+      .json({ success: false, message: "Test result not found" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+};
 module.exports = {
   submit,
   getResultByContestId,
+  getTestResult,
 };

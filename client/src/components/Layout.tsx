@@ -7,7 +7,6 @@ import { useDispatch } from "react-redux";
 import { logoutUser } from "../actions/authActions";
 import { useAppSelector } from "../store";
 
-
 const NavBarWrapper = styled("div")({
   display: "flex",
   justifyContent: "center",
@@ -51,22 +50,23 @@ const Layout = ({ children }: any) => {
                 >
                   Quản lý người dùng
                 </Button>
-                <Button
-                  color="inherit"
-                  onClick={() => handleNavigate("/manage-tests")}
-                >
-                  Quản lý đề thi
-                </Button>
               </>
             )}
-            {(userDetails?.role === "admin" || userDetails?.role === "host") && (
+            {(userDetails?.role === "admin" ||
+              userDetails?.role === "host") && (
               <Button
                 color="inherit"
-                onClick={() => handleNavigate("/take-exam")}
+                onClick={() => handleNavigate("/manage-tests")}
               >
-                Làm đề thi
+                Quản lý đề thi
               </Button>
             )}
+            <Button
+              color="inherit"
+              onClick={() => handleNavigate("/take-exam")}
+            >
+              Làm đề thi
+            </Button>
           </NavBarWrapper>
           <Button
             color="inherit"

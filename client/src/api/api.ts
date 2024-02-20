@@ -124,7 +124,6 @@ export const deleteUser = async (userId: string) => {
 export const getAllContest = async () => {
   try {
     const res: any = await api.get<any>(`/api/contest/getAll`);
-    console.log("ressssss", res);
     return res;
   } catch (error: any) {
     console.log("error asd", error);
@@ -191,7 +190,6 @@ export const createFillInBlankQuest = async (contestId: any, data: any) => {
       `/api/contest/${contestId}/fillInBlankQuest`,
       data
     );
-    console.log(res);
     return res;
   } catch (error: any) {
     console.log(error);
@@ -340,7 +338,7 @@ export const updateUserRole = async (userId: any, newRole: any) => {
 
 export const submit = async (data: any) => {
   try {
-    const res = await api.post(`/api/result/submit`, {
+    const res: any = await api.post(`/api/result/submit`, {
       userId: data.userId,
       contestId: data.contestId,
       answers: data.answers,

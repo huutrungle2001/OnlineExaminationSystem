@@ -30,9 +30,11 @@ const TestList = () => {
   useEffect(() => {
     const fetchContests = async () => {
       try {
-        const response: any = await getAddedContest(userDetails?._id);
-        if (response.status === 200) {
-          setContests(response.data.contests);
+        if (userDetails?._id) {
+          const response: any = await getAddedContest(userDetails?._id);
+          if (response.status === 200) {
+            setContests(response.data.contests);
+          }
         }
       } catch (error) {
         console.log(error);
@@ -72,6 +74,7 @@ const TestList = () => {
               <TableCell>Host</TableCell>
               <TableCell>CreatedAt</TableCell>
               <TableCell>UpdatedAt</TableCell>
+              <TableCell>TestResult</TableCell>
               <TableCell>Details</TableCell>
             </TableRow>
           </TableHead>
@@ -83,6 +86,7 @@ const TestList = () => {
                 <TableCell>{contest.hostId}</TableCell>
                 <TableCell>{contest.createdAt}</TableCell>
                 <TableCell>{contest.updatedAt}</TableCell>
+                <TableCell>{contest.testResult || ''}</TableCell>
                 <TableCell>
                   <Button
                     variant="contained"

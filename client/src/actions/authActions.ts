@@ -9,7 +9,6 @@ import { actionTypes, CurrentUser } from "./types";
 export const loginUser = (credentials: LoginArgs) => {
   return async (dispatch: Dispatch) => {
     const response = await login(credentials);
-
     if ("error" in response) {
       dispatch({
         type: actionTypes.authError,

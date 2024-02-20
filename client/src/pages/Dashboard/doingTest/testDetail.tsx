@@ -62,11 +62,11 @@ const TestDetail = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log(userAnswers)
       const response: any = await submit(userAnswers);
       if (response.data.success === true) {
-        console.log("Test submitted successfully!");
-        // Thực hiện các hành động sau khi nộp bài thi thành công
+        alert(`Your test score: ${response.data.data.testScores}`);
+      } else {
+        alert(response.data.message);
       }
     } catch (error) {
       console.log(error);
